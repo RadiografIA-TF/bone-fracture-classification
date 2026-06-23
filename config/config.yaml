@@ -1,3 +1,21 @@
 path:
   raw_data_dir: "data/raw"
   processed_data_dir: "data/processed"
+
+model:
+  paths:
+    save_model_path: "checkpoints/radriografia_efficientnet_b2.h5"
+    save_historial_path: "checkpoints/historial_entrenamiento.json"
+    train_path: "data/processed/dataset_fracturas/Train"
+    test_path: "data/processed/dataset_fracturas/Test"
+  
+  parameters:
+    epochs: 10
+    learning_rate: 0.001
+    batch_size: 32
+    num_classes: 8
+
+  transforms:
+    input_shape: [288, 288, 3]
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
