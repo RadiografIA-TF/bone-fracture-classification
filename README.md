@@ -7,9 +7,11 @@ Un proyecto de **clasificación de fracturas óseas** mediante modelos de aprend
 Este proyecto implementará un sistema de clasificación de imágenes médicas (radiografías) para detectar diferentes tipos de fracturas óseas. Utiliza técnicas de procesamiento de imágenes y modelos de deep learning para automatizar el análisis de radiografías.
 
 ### Dataset
-- **Fuente:** Kaggle - Bone Break Classification Image Dataset
-- **Contenido:** Radiografías categorizadas por tipo de fractura
-- **Licencia:** Consultar página del dataset en Kaggle
+- **Fuente:** Kaggle - Bone Break Classification Image Dataset / FracAtlas
+- **Contenido:** Radiografías categorizadas para clasificación binaria (Fractura vs No Fractura).
+- **Instrucciones de descarga:** Debido a las limitaciones de tamaño de GitHub, el dataset no está incluido en el repositorio. Debes descargar el archivo comprimido desde el siguiente enlace de Google Drive: `[LINK_DE_DRIVE]`.
+- **Instalación:** Descomprime el archivo y coloca la carpeta resultante llamada `data` en la raíz del repositorio. La estructura debe quedar como `data/FracAtlas/images/...` (con las subcarpetas `Fractured` y `Non_fractured`).
+- El directorio `data/` está configurado en `.gitignore` para evitar subir archivos pesados.
 
 ## Inicio Rápido
 
