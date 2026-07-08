@@ -1,7 +1,5 @@
-from torchvision.models import efficientnet_b3, EfficientNet_B2_Weights
 import torch.nn as nn
 import timm
-import yaml
 
 class RadriografiaEfficientNetB3(nn.Module):
     def __init__(self, num_classes=2, model_name='efficientnet_b3', pretrained=True, freeze_backbone=True):
@@ -21,7 +19,7 @@ class RadriografiaEfficientNetB3(nn.Module):
     def unfreze_backbone(self, phase_num=0):
         if phase_num == 0:
             # Obtenemos el numero de features de salida del modelo preentrenado
-            num_features = self.model.classifier[1].in_features
+            num_features = self.model.classifier.in_features
 
             # Creamos un sequential con un dropout y una capa lineal para la clasificación
             self.model.classifier = nn.Sequential(

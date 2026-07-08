@@ -1,3 +1,3 @@
-from .efficientnet import RadriografiaEfficientNetB2
+from .efficientnet import RadriografiaEfficientNetB3
 
-__all__ = ["RadriografiaEfficientNetB2"]
+__all__ = ["RadriografiaEfficientNetB3"]

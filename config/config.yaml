@@ -17,9 +17,10 @@ model:
     epochs_phases: [30, 20, 15, 15]
     learning_rate: [0.001, 1e-5, 5e-6, 5e-6]
     split: {'train': 0.8, 'val': 0.1, 'test': 0.1}
-    wheight_decay: [0.000, 5e-4, 1e-4, 1e-4]
+    weight_decay: [0.000, 5e-4, 1e-4, 1e-4]
     batch_size: 32
     clases: ["fractura", "no_fractura"]
+    patience: 15
 
   efficient_net_b3:
     classifier:

@@ -1,5 +1,6 @@
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 from scipy import ndimage as ndi
 from skimage import exposure
 import os
@@ -59,7 +60,7 @@ def preprocessing_pipeline(ruta_imagen):
 # ------------------------------------------------------------------
 # 1. Función genérica de filtrado + procesamiento + guardado
 # ------------------------------------------------------------------
-def process_and_store_fracatlas(src_path, filename, target_dir,
+def process_and_store(src_path, filename, target_dir,
                            prefix="new_ds_"):
     """
     Valida una imagen contra filtros de calidad y, si pasa,
@@ -102,14 +103,28 @@ def process_and_store_fracatlas(src_path, filename, target_dir,
 # ------------------------------------------------------------------
 # 2. Función genérica para recolectar tareas (buscar imágenes)
 # ------------------------------------------------------------------
-def collect_tasks(raw_dir, extensions=('.png', '.jpg', '.jpeg', '.webp')):
+def collect_tasks(raw_dir, extensions=('.png', '.jpg', '.jpeg', '.webp'),
+                   exclude_folders=None):
     """
     Recorre raw_dir (y todas sus subcarpetas) y arma la lista de
     (src_path, filename) de todas las imágenes encontradas.
+
+    exclude_folders : list de str o None. Si una carpeta en exclude_folders
+                       aparece en CUALQUIER punto de la ruta (no solo el
+                       último nivel), se excluyen todas las imágenes bajo
+                       ella, sin importar cuántos subniveles tenga
+                       (ej. 'Avulsion fracture/train/', 'Avulsion fracture/test/').
     """
+    exclude_folders = [f.lower() for f in (exclude_folders or [])]
     tasks = []
+
     for root, dirs, files in os.walk(raw_dir):
+        root_lower = root.lower()
+        if any(excl in root_lower for excl in exclude_folders):
+            continue
+
         for file in files:
             if file.lower().endswith(extensions):
                 tasks.append((os.path.join(root, file), file))
+
     return tasks

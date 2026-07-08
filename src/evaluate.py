@@ -1,123 +1,68 @@
-import os
-import json
-import yaml
 import torch
-import torch.nn as nn
-import numpy as np
+import torch.nn.functional as F
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
-from pathlib import Path
-from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.metrics import (classification_report, confusion_matrix,
+                               roc_curve, roc_auc_score)
 
-from src.utils import get_transforms
-from src.models import RadriografiaEfficientNetB2
 
-def evaluate_model():
-    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+def evaluate_model(model, test_loader, criterion, device,
+                    model_path=None,
+                    desc='Testing'):
+    """
+    Evalúa un modelo sobre un set de test/validación: calcula loss,
+    reporte de clasificación, matriz de confusión y curva ROC.
 
-    # 1. Cargar Configuración
-    CONFIG_PATH = PROJECT_ROOT / "config" / "config.yaml"
-    with open(CONFIG_PATH, "r") as f:
-        config = yaml.safe_load(f)
+    Parámetros
+    ----------
+    model : el modelo ya instanciado (arquitectura).
+    test_loader : DataLoader del set de evaluación.
+    criterion : función de pérdida.
+    device : torch.device.
+    model_path : str o None. Si se pasa, carga esos pesos en el modelo
+                 antes de evaluar (torch.load + load_state_dict).
+                 Si es None, evalúa el modelo tal como está en memoria.
+    class_names : tupla/lista con 2 nombres para las clases (etiquetas
+                  del reporte y de los ejes de la matriz de confusión).
+    plot_confusion : bool, si graficar la matriz de confusión.
+    plot_roc : bool, si graficar la curva ROC.
+    desc : texto para la barra de progreso.
 
-    # Rutas
-    test_path = PROJECT_ROOT / config["model"]["paths"]["test_path"]
-    save_model_path = PROJECT_ROOT / config["model"]["paths"]["save_model_path"]
-    checkpoint_dir = PROJECT_ROOT / "checkpoints"
+    Retorna
+    -------
+    dict con: 'loss', 'labels', 'preds', 'probs', 'auc'
+    """
+    if model_path is not None:
+        model.load_state_dict(torch.load(model_path, map_location=device))
 
-    # Parámetros del modelo
-    num_classes = config["model"]["parameters"]["num_classes"]
-    batch_size = config["model"]["parameters"]["batch_size"]
-    input_shape = config["model"]["transforms"]["input_shape"]
-    mean = config["model"]["transforms"]["mean"]
-    std = config["model"]["transforms"]["std"]
-
-    print("=" * 60)
-    print("INICIANDO EVALUACIÓN DEL MODELO DE FASE 1")
-    print("=" * 60)
-    print(f"Ruta de test: {test_path}")
-    print(f"Ruta del modelo guardado: {save_model_path}")
-
-    # 2. Cargar Dataset de Test
-    transforms_model = get_transforms(
-        output_size=(input_shape[0], input_shape[1]),
-        mean=mean,
-        std=std,
-        output_channels=input_shape[2]
-    )
-
-    if not test_path.exists():
-        print(f"Error: La ruta de test {test_path} no existe. Por favor ejecute la preparación de datos.")
-        return
-
-    dataset_test = ImageFolder(root=test_path, transform=transforms_model)
-    loader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=False)
-    classes = dataset_test.classes
-    print(f"Imágenes de prueba encontradas: {len(dataset_test)}")
-    print(f"Clases a evaluar: {classes}")
-
-    # 3. Cargar el Modelo Entrenado
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Evaluando en dispositivo: {device}")
-
-    model = RadriografiaEfficientNetB2(num_classes=num_classes)
-    if not save_model_path.exists():
-        print(f"Error: No se encontró el modelo guardado en {save_model_path}")
-        return
-
-    model.load_state_dict(torch.load(save_model_path, map_location=device))
-    model.to(device)
     model.eval()
-
-    # 4. Inferencia
-    y_true = []
-    y_pred = []
+    all_preds, all_labels, all_probs = [], [], []
+    running_loss = 0.0
 
     with torch.no_grad():
-        for inputs, labels in loader_test:
-            inputs = inputs.to(device)
-            outputs = model(inputs)
+        for images, labels in tqdm(test_loader, desc=desc):
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            running_loss += loss.item()
+
+            probs = F.softmax(outputs, dim=1)[:, 1]
             _, preds = torch.max(outputs, 1)
-            
-            y_true.extend(labels.numpy())
-            y_pred.extend(preds.cpu().numpy())
 
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
+            all_labels.extend(labels.cpu().numpy())
+            all_preds.extend(preds.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
 
-    # 5. Calcular Métricas
-    accuracy = accuracy_score(y_true, y_pred)
-    report = classification_report(y_true, y_pred, target_names=classes, output_dict=True)
-    report_text = classification_report(y_true, y_pred, target_names=classes)
+    avg_loss = running_loss / len(test_loader)
+    print(f'\nLoss: {avg_loss:.4f}')
+    
+    auc_score = roc_auc_score(all_labels, all_probs)
 
-    print("\n" + "=" * 60)
-    print("REPORTE DE CLASIFICACIÓN:")
-    print("=" * 60)
-    print(report_text)
-    print(f"Accuracy Total: {accuracy:.4f}")
-    print("=" * 60)
-
-    # Guardar reporte en JSON
-    report_json_path = checkpoint_dir / "reporte_evaluacion_fase1.json"
-    with open(report_json_path, "w") as f:
-        json.dump(report, f, indent=4)
-    print(f"Reporte de clasificación guardado en: {report_json_path}")
-
-    # 6. Generar Matriz de Confusión
-    cm = confusion_matrix(y_true, y_pred)
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=classes, yticklabels=classes)
-    plt.title("Matriz de Confusión - EfficientNet-B2 (Fase 1)")
-    plt.ylabel("Real")
-    plt.xlabel("Predicho")
-    plt.tight_layout()
-
-    cm_path = checkpoint_dir / "matriz_confusion_fase1.png"
-    plt.savefig(cm_path)
-    plt.close()
-    print(f"Matriz de confusión guardada en: {cm_path}")
-
-if __name__ == "__main__":
-    evaluate_model()
+    return {
+        'loss': avg_loss,
+        'labels': all_labels,
+        'preds': all_preds,
+        'probs': all_probs,
+        'auc': auc_score,
+    }
