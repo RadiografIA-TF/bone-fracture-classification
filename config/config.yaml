@@ -1,21 +1,35 @@
-path:
-  raw_data_dir: "data/raw"
-  processed_data_dir: "data/processed"
+paths:
+  model_path_tf: "checkpoints/radriografia_efficientnet_b3_tf.h5"
+  historial_path_tf: "checkpoints/historial_entrenamiento_tf.json"
+  model_path_ft1: "checkpoints/radriografia_efficientnet_b3_ft1.h5"
+  historial_path_ft1: "checkpoints/historial_entrenamiento_ft1.json"
+  model_path_ft2: "checkpoints/radriografia_efficientnet_b3_ft2.h5"
+  historial_path_ft2: "checkpoints/historial_entrenamiento_ft2.json"
+  model_path_ft3: "checkpoints/radriografia_efficientnet_b3_ft3.h5"
+  historial_path_ft3: "checkpoints/historial_entrenamiento_ft3.json"
+  processed_dataset_path: "data/processed/dataset_fracturas"
+  raw_dataset_path: "data/raw/dataset_fracturas"
 
 model:
-  paths:
-    save_model_path: "checkpoints/radriografia_efficientnet_b2.h5"
-    save_historial_path: "checkpoints/historial_entrenamiento.json"
-    train_path: "data/processed/dataset_fracturas/Train"
-    test_path: "data/processed/dataset_fracturas/Test"
+  name: "efficientnet_b3"
   
   parameters:
-    epochs: 10
-    learning_rate: 0.001
+    epochs_phases: [30, 20, 15, 15]
+    learning_rate: [0.001, 1e-5, 5e-6, 5e-6]
+    split: {'train': 0.8, 'val': 0.1, 'test': 0.1}
+    wheight_decay: [0.000, 5e-4, 1e-4, 1e-4]
     batch_size: 32
-    num_classes: 8
+    clases: ["fractura", "no_fractura"]
+
+  efficient_net_b3:
+    classifier:
+      dropout: 0.3
 
   transforms:
-    input_shape: [288, 288, 3]
+    input_shape: [384, 384]
     mean: [0.485, 0.456, 0.406]
     std: [0.229, 0.224, 0.225]
+    scale: [0.8, 1.0]
+    random_h_flip: 0.5
+    random_v_flip: 0.5
+    rot_deg: 30
