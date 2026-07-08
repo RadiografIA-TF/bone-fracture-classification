@@ -1,83 +1,153 @@
 # Bone Fracture Classification
 
-Un proyecto de **clasificación de fracturas óseas** mediante modelos de aprendizaje automático utilizando radiografías del dataset [Bone Break Classification Image Dataset](https://www.kaggle.com/datasets/pkdarabi/bone-break-classification-image-dataset) de Kaggle.
+Proyecto de clasificación de fracturas óseas a partir de radiografías usando **PyTorch** y **EfficientNet-B3**. El repositorio combina scripts de entrenamiento, evaluación e inferencia con notebooks para análisis exploratorio y preparación de datos.
 
-## Descripción
+## Resumen
 
-Este proyecto implementará un sistema de clasificación de imágenes médicas (radiografías) para detectar diferentes tipos de fracturas óseas. Utiliza técnicas de procesamiento de imágenes y modelos de deep learning para automatizar el análisis de radiografías.
+El objetivo es entrenar un clasificador binario para distinguir entre radiografías con fractura y sin fractura. El proyecto incluye:
 
-### Dataset
-- **Fuente:** Kaggle - Bone Break Classification Image Dataset / FracAtlas
-- **Contenido:** Radiografías categorizadas para clasificación binaria (Fractura vs No Fractura).
-- **Instrucciones de descarga:** Debido a las limitaciones de tamaño de GitHub, el dataset no está incluido en el repositorio. Debes descargar el archivo comprimido desde el siguiente enlace de Google Drive: `[LINK_DE_DRIVE]`.
-- **Instalación:** Descomprime el archivo y coloca la carpeta resultante llamada `data` en la raíz del repositorio. La estructura debe quedar como `data/FracAtlas/images/...` (con las subcarpetas `Fractured` y `Non_fractured`).
-- El directorio `data/` está configurado en `.gitignore` para evitar subir archivos pesados.
+- Preprocesado de imágenes médicas.
+- Entrenamiento con transfer learning y fine-tuning.
+- Evaluación con accuracy, recall, matriz de confusión y curva ROC.
+- Guardado de modelos y métricas en `checkpoints/`.
 
-## Inicio Rápido
+## Estructura Del Proyecto
 
-### 1. Clonar el Repositorio
-
-```bash
-git clone https://github.com/AlexC0dex/bone-fracture-classification.git
-cd bone-fracture-classification
+```text
+bone-fracture-classification/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── checkpoints/
+│   ├── historial_entrenamiento_tf.json
+│   ├── historial_entrenamiento_ft1.json
+│   ├── historial_entrenamiento_ft2.json
+│   ├── historial_entrenamiento_ft3.json
+│   ├── radriografia_efficientnet_b3_tf.h5
+│   ├── radriografia_efficientnet_b3_ft1.h5
+│   ├── radriografia_efficientnet_b3_ft2.h5
+│   └── radriografia_efficientnet_b3_ft3.h5
+├── config/
+│   └── config.yaml
+├── data/
+│   ├── raw/
+│   │   └── dataset_fracturas/
+│   │       ├── BoneBreak_raw/
+│   │       └── FractAtlas_raw/
+│   └── processed/
+│       └── dataset_fracturas/
+│           ├── fractured/
+│           └── non_fractured/
+├── notebooks/
+│   ├── 01_eda_d1.ipynb
+│   ├── 01_eda_d2.ipynb
+│   ├── 01_preprocess_data.ipynb
+│   ├── 02_model_v1.ipynb
+│   ├── 02_model_v2.ipynb
+│   └── 02_model_v3.ipynb
+└── src/
+    ├── evaluate.py
+    ├── inference.py
+    ├── train.py
+    ├── train_finetune.py
+    ├── models/
+    │   ├── __init__.py
+    │   └── efficientnet.py
+    └── utils/
+        ├── __init__.py
+        ├── metrics.py
+        ├── plot_metrics.py
+        ├── preprocess.py
+        └── transform.py
 ```
 
-### 2. Instalar Dependencias
+## Datos
 
-#### Opción A: Usando PIP
+El repositorio trabaja con dos orígenes de datos en `data/raw/dataset_fracturas/`:
+
+- `BoneBreak_raw/`, con subcarpetas por tipo de fractura y partición `Train/Test`.
+- `FractAtlas_raw/`, con imágenes `Fractured` y `Non_fractured`, además de anotaciones en varios formatos.
+
+El conjunto procesado se guarda en `data/processed/dataset_fracturas/` con clases binarias:
+
+- `fractured/`
+- `non_fractured/`
+
+Por tamaño, `data/` está pensado para no versionarse en Git.
+
+## Configuración
+
+La configuración principal está en [config/config.yaml](config/config.yaml). Ahí se definen:
+
+- Rutas de checkpoints y datasets.
+- Tamaño de entrada (`384 x 384`).
+- Parámetros de entrenamiento por fases.
+- Hiperparámetros de augmentación y normalización.
+
+## Componentes Principales
+
+- `src/models/efficientnet.py`: define el modelo `RadriografiaEfficientNetB3` sobre EfficientNet-B3.
+- `src/train.py`: bucle de entrenamiento con métricas, AMP, early stopping y guardado del mejor modelo.
+- `src/train_finetune.py`: flujo de fine-tuning a partir de un modelo ya entrenado.
+- `src/evaluate.py`: evaluación sobre validación/test con métricas y ROC AUC.
+- `src/inference.py`: inferencia sobre una imagen individual y visualización del resultado.
+- `src/utils/preprocess.py`: pipeline de preprocesado de imágenes.
+- `src/utils/transform.py`: transformaciones para entrenamiento y validación.
+
+## Instalación
+
+### 1. Crear entorno e instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Opción B: Usando CONDA
+Si vas a usar GPU, instala la versión de `torch` compatible con tu entorno CUDA.
 
-```bash
-conda install -y numpy pandas matplotlib pyyaml pillow scipy scikit-image
-```
+### 2. Verificar estructura de datos
 
-### 3. Ejecutar el Análisis Exploratorio
+Asegúrate de que existan las carpetas esperadas en `data/raw/` y, si ya procesaste el dataset, en `data/processed/`.
 
-Abre el notebook del análisis exploratorio
+## Uso
 
-## 📁 Estructura del Proyecto
+El proyecto está organizado para usarse desde notebooks o desde scripts Python. Flujo recomendado:
 
-```
-bone-fracture-classification/
-│
-├── README.md                    # Este archivo
-├── LICENSE                      # Licencia del proyecto
-├── requirements.txt             # Dependencias del proyecto
-│
-├── config/
-│   └── config.yaml             # Configuración del proyecto
-│
-├── data/
-│   ├── raw/                    # Datos sin procesar
-│   │   └── dataset_fracturas/  # Dataset descargado de Kaggle
-│   └── processed/              # Datos procesados
-│
-└── notebooks/
-    └── 01_eda.ipynb            # Análisis Exploratorio de Datos (EDA)
-```
+1. Explorar datos con `notebooks/01_eda_d1.ipynb` y `notebooks/01_eda_d2.ipynb`.
+2. Preparar el dataset con `notebooks/01_preprocess_data.ipynb`.
+3. Entrenar modelos con `notebooks/02_model_v1.ipynb`, `02_model_v2.ipynb` o `02_model_v3.ipynb` según la versión que quieras reproducir.
+4. Revisar resultados en `checkpoints/`.
 
-### Descripción de Carpetas
+## Versiones Del Modelo
 
-- **`config/`** - Archivos de configuración (rutas, parámetros, etc.)
-- **`data/`** - Almacenamiento de datos
-  - `raw/` - Dataset original de Kaggle
-  - `processed/` - Datos preprocesados y transformados
-- **`notebooks/`** - Jupyter notebooks con análisis y experimentos
-  - `01_eda.ipynb` - Exploración inicial del dataset
+Los notebooks `model_v#` representan etapas concretas del proyecto:
+
+- `v1`: primer entrenamiento con el primer enfoque para la clasificación.
+- `v2`: segundo enfoque para distinguir fractura vs no fractura.
+- `v3`: versión final que combina ambos datasets para predecir entre fractura y no fractura.
+
+## Archivos Generados
+
+- Modelos guardados en `checkpoints/*.h5`.
+- Historial de entrenamiento en `checkpoints/*.json`.
+- Dataset procesado en `data/processed/dataset_fracturas/`.
 
 ## Dependencias
 
-| Librería | Versión | Uso |
-|----------|---------|-----|
-| numpy | >=1.24.0 | Operaciones numéricas |
-| pandas | >=2.0.0 | Manipulación de datos |
-| matplotlib | >=3.7.0 | Visualización |
-| pyyaml | >=6.0 | Lectura de configuración |
-| Pillow | >=10.0.0 | Procesamiento de imágenes |
-| scipy | >=1.11.0 | Funciones científicas |
-| scikit-image | >=0.21.0 | Procesamiento avanzado de imágenes |
+Las dependencias principales del proyecto son:
+
+- `numpy`
+- `pandas`
+- `matplotlib`
+- `pyyaml`
+- `Pillow`
+- `scipy`
+- `scikit-image`
+- `tqdm`
+- `torch`
+- `timm`
+
+## Notas
+
+- El nombre de algunos checkpoints usa el prefijo `radriografia_...` tal como aparece en el repositorio.
+- Hay más de un dataset raw disponible; el pipeline puede adaptarse según la fuente utilizada en los notebooks.
+
