@@ -23,10 +23,6 @@ def evaluate_model(model, test_loader, criterion, device,
     model_path : str o None. Si se pasa, carga esos pesos en el modelo
                  antes de evaluar (torch.load + load_state_dict).
                  Si es None, evalúa el modelo tal como está en memoria.
-    class_names : tupla/lista con 2 nombres para las clases (etiquetas
-                  del reporte y de los ejes de la matriz de confusión).
-    plot_confusion : bool, si graficar la matriz de confusión.
-    plot_roc : bool, si graficar la curva ROC.
     desc : texto para la barra de progreso.
 
     Retorna

@@ -9,6 +9,7 @@ El objetivo es entrenar un clasificador binario para distinguir entre radiograf�
 - Preprocesado de imágenes médicas.
 - Entrenamiento con transfer learning y fine-tuning.
 - Evaluación con accuracy, recall, matriz de confusión y curva ROC.
+- Explicación visual del modelo con Grad-CAM.
 - Guardado de modelos y métricas en `checkpoints/`.
 
 ## Estructura Del Proyecto
@@ -55,6 +56,7 @@ bone-fracture-classification/
     │   └── efficientnet.py
     └── utils/
         ├── __init__.py
+        ├── gradcam.py
         ├── metrics.py
         ├── plot_metrics.py
         ├── preprocess.py
@@ -92,6 +94,7 @@ La configuración principal está en [config/config.yaml](config/config.yaml). A
 - `src/evaluate.py`: evaluación sobre validación/test con métricas y ROC AUC.
 - `src/inference.py`: inferencia sobre una imagen individual y visualización del resultado.
 - `src/utils/preprocess.py`: pipeline de preprocesado de imágenes.
+- `src/utils/gradcam.py`: generación de mapas Grad-CAM para interpretar las predicciones del modelo.
 - `src/utils/transform.py`: transformaciones para entrenamiento y validación.
 
 ## Instalación
