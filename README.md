@@ -146,7 +146,7 @@ Si vas a usar GPU, instala la versión de `torch` compatible con tu entorno CUDA
 
 ### 2. Verificar estructura de datos
 
-Asegúrate de que existan las carpetas esperadas en `data/raw/` y, si ya procesaste el dataset, en `data/processed/`.
+Asegúrate de que existan las carpetas esperadas en `data/raw/` y, si ya procesaste el dataset, en `data/processed/`. Sino ejecutar el notebook `notebooks/01_preprocess_data.ipynb`
 
 ## Uso
 
