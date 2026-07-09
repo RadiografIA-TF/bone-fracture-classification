@@ -255,23 +255,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Actualizar clases CSS y tarjeta de resultados
         resultsCard.className = `card results-card ${isFractura ? 'fractura' : 'no-fractura'}`;
         resultBadge.className = `result-badge ${isFractura ? 'fractura' : 'no-fractura'}`;
-        
-        // Actualizar texto e iconos
-        resultText.textContent = data.prediction;
-        
-        // Destruir y recrear el icono de lucide para evitar errores de renderizado
-        resultIcon.setAttribute('data-lucide', isFractura ? 'alert-triangle' : 'shield-check');
+
+        const predictionText = data.prediction || (isFractura ? 'Fractura Detectada' : 'Normal');
+        resultBadge.innerHTML = `
+            <i data-lucide="${isFractura ? 'alert-triangle' : 'shield-check'}"></i>
+            <span id="result-text">${predictionText}</span>
+        `;
+
         lucide.createIcons({
-            attrs: {
-                class: 'lucide-icon'
-            },
-            nameAttr: 'data-lucide'
+            root: resultBadge
         });
+        
+        const confValue = data.confidence > 1 ? data.confidence : (data.confidence * 100);
 
         // Actualizar métricas
-        confidencePercentage.textContent = `${(data.confidence * 100).toFixed(1)}%`;
-        confidenceFill.style.width = `${data.confidence * 100}%`;
-        inferenceTime.textContent = `${data.inference_time_ms} ms`;
+        confidencePercentage.textContent = `${confValue.toFixed(1)}%`;
+        confidenceFill.style.width = `${Math.min(confValue, 100)}%`; 
+        inferenceTime.textContent = `${data.inference_time_ms || '--'} ms`;
         appliedThreshold.textContent = parseFloat(thresholdSlider.value).toFixed(2);
     }
 

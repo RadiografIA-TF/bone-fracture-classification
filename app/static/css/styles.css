@@ -757,7 +757,7 @@ select:focus {
 
 .image-wrapper {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 280px;
     background-color: #000;
     border: 1px solid var(--border-color);
     border-radius: 10px;

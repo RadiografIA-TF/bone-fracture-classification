@@ -11,6 +11,7 @@ El objetivo es entrenar un clasificador binario para distinguir entre radiograf�
 - Evaluación con accuracy, recall, matriz de confusión y curva ROC.
 - Explicación visual del modelo con Grad-CAM.
 - Guardado de modelos y métricas en `checkpoints/`.
+- Despliegue local con API FastAPI y frontend estático para inferencia y explicabilidad.
 
 ## Estructura Del Proyecto
 
@@ -21,7 +22,7 @@ bone-fracture-classification/
 ├── requirements.txt
 ├── app/
 │   ├── main.py
-│   ├── test_api.py
+│   ├── temp/
 │   └── static/
 │       ├── index.html
 │       ├── css/
@@ -106,6 +107,34 @@ La configuración principal está en [config/config.yaml](config/config.yaml). A
 - `src/utils/gradcam.py`: generación de mapas Grad-CAM para interpretar las predicciones del modelo.
 - `src/utils/transform.py`: transformaciones para entrenamiento y validación.
 
+## Aplicación Web
+
+La carpeta `app/` contiene una aplicación local basada en **FastAPI** con una interfaz web estática para probar el modelo final.
+
+La API usa `fastapi`, `uvicorn`, `python-multipart` y `pytorch-grad-cam` para inferencia y explicabilidad.
+
+### Componentes
+
+- `app/main.py`: crea la API, carga el modelo y monta el frontend estático.
+- `app/static/index.html`: interfaz principal de la aplicación.
+- `app/static/css/styles.css`: estilos de la interfaz.
+- `app/static/js/app.js`: lógica del cliente para consumir la API.
+- `app/test_api.py`: prueba automatizada del flujo completo de la API.
+
+### Endpoints
+
+- `GET /health`: verifica que el modelo quedó cargado correctamente.
+- `POST /predict`: recibe una imagen y devuelve la clase predicha, la confianza y el tiempo de inferencia.
+- `POST /explain`: genera una explicación visual con Grad-CAM para la predicción.
+
+### Ejecución Local
+
+```bash
+fastapi run app/main.py
+```
+
+Luego abre [http://127.0.0.1:8000](http://127.0.0.1:8000) para usar la interfaz web.
+
 ## Instalación
 
 ### 1. Crear entorno e instalar dependencias
@@ -128,31 +157,6 @@ El proyecto está organizado para usarse desde notebooks o desde scripts Python.
 2. Preparar el dataset con `notebooks/01_preprocess_data.ipynb`.
 3. Entrenar modelos con `notebooks/02_model_v1.ipynb`, `02_model_v2.ipynb` o `02_model_v3.ipynb` según la versión que quieras reproducir.
 4. Revisar resultados en `checkpoints/`.
-
-## Despliegue de la Aplicación Web (FastAPI & UI)
-
-El proyecto cuenta con un portal web local interactivo que expone una API de inferencia en **FastAPI** y un dashboard premium en escala oscura (**HTML, CSS y JS Vainilla**) para cargar imágenes, ajustar parámetros clínicos y visualizar mapas de calor explicativos vía **Grad-CAM**.
-
-### 1. Requisitos previos
-Instala las dependencias adicionales para el servidor web y explicabilidad:
-```bash
-pip install fastapi uvicorn python-multipart grad-cam
-```
-
-### 2. Ejecutar la Aplicación
-Inicia el servidor local de desarrollo mediante Uvicorn:
-```bash
-uvicorn app.main:app --reload
-```
-
-Una vez en marcha, abre tu navegador en:
-👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
-
-### 3. Pruebas Automatizadas
-Para verificar el correcto funcionamiento de todos los endpoints de la API (`/health`, `/predict`, `/explain`) usando un cliente simulado, ejecuta:
-```bash
-python app/test_api.py
-```
 
 ## Versiones Del Modelo
 
