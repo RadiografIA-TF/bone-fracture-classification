@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadiografIA - Sistema de Diagnóstico Asistido de Fracturas</title>
+    <meta name="description" content="Interfaz web de diagnóstico médico por imágenes para la detección de fracturas óseas mediante Inteligencia Artificial.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i data-lucide="activity"></i>
+                </div>
+                <span>Radiograf<span class="highlight">IA</span></span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" id="menu-dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Diagnóstico</span>
+                </a>
+                <a href="https://github.com" target="_blank" class="menu-item" id="menu-github">
+                    <i data-lucide="github"></i>
+                    <span>Repositorio</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="connection-status">
+                    <span class="status-indicator online" id="status-dot"></span>
+                    <span id="status-text">Conectando...</span>
+                </div>
+                <div class="device-info" id="device-badge">
+                    <i data-lucide="cpu"></i>
+                    <span id="device-text">Dispositivo: -</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="app-header">
+                <div class="header-title">
+                    <h1>Portal de Diagnóstico Radiológico</h1>
+                    <p class="subtitle">Asistente de detección de fracturas óseas en tiempo real</p>
+                </div>
+                <div class="header-actions">
+                    <div class="date-badge">
+                        <i data-lucide="calendar"></i>
+                        <span id="current-date">--/--/----</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Left Column: Settings and Image Upload -->
+                <div class="panel-column">
+                    <!-- Configuration Panel -->
+                    <section class="card config-card">
+                        <div class="card-header">
+                            <i data-lucide="sliders"></i>
+                            <h2>Configuración de Inferencia</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="control-group">
+                                <div class="control-header">
+                                    <label for="threshold-slider">Umbral de Decisión (Threshold)</label>
+                                    <span class="value-badge" id="threshold-val">0.50</span>
+                                </div>
+                                <input type="range" id="threshold-slider" min="0.05" max="0.95" step="0.05" value="0.50">
+                                <p class="control-help">Reducir el umbral aumenta la sensibilidad (Recall) clínica del modelo.</p>
+                            </div>
+                            <div class="control-group">
+                                <div class="control-header">
+                                    <label for="layer-select">Capa para Grad-CAM</label>
+                                </div>
+                                <select id="layer-select">
+                                    <option value="conv_head" selected>Cabezal Convolucional (conv_head)</option>
+                                    <option value="blocks[6]">Bloque 6 (blocks[6]) - Activación Tardía</option>
+                                    <option value="blocks[5]">Bloque 5 (blocks[5]) - Activación Media</option>
+                                </select>
+                                <p class="control-help">Determina el nivel de abstracción de las características visualizadas.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Upload Panel -->
+                    <section class="card upload-card">
+                        <div class="card-header">
+                            <i data-lucide="image"></i>
+                            <h2>Cargar Radiografía</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="drop-zone" id="drop-zone">
+                                <input type="file" id="file-input" accept="image/*" class="file-input">
+                                <div class="drop-zone-prompt">
+                                    <div class="upload-icon-wrapper">
+                                        <i data-lucide="cloud-upload" class="upload-icon"></i>
+                                    </div>
+                                    <h3>Arrastra la imagen aquí</h3>
+                                    <p>o haz clic para explorar tus archivos</p>
+                                    <span class="file-format-hint">Formatos soportados: JPG, PNG, WEBP</span>
+                                </div>
+                                <div class="drop-zone-preview" id="drop-zone-preview" style="display: none;">
+                                    <img id="image-preview" src="" alt="Previsualización de Radiografía">
+                                    <button class="remove-btn" id="remove-preview-btn" title="Quitar imagen">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button id="analyze-btn" class="btn btn-primary btn-block" disabled>
+                                <i data-lucide="play"></i>
+                                <span>Ejecutar Análisis</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column: Results & Explicability -->
+                <div class="panel-column flex-grow">
+                    <!-- Results Card -->
+                    <section class="card results-card" id="results-card">
+                        <div class="card-header">
+                            <i data-lucide="heart-pulse"></i>
+                            <h2>Resultados del Diagnóstico</h2>
+                        </div>
+                        <div class="card-body result-body-empty" id="result-placeholder">
+                            <div class="placeholder-content">
+                                <i data-lucide="search" class="placeholder-icon"></i>
+                                <h3>Sin datos cargados</h3>
+                                <p>Cargue una imagen radiográfica y ejecute el análisis para ver los resultados.</p>
+                            </div>
+                        </div>
+                        <div class="card-body" id="result-content" style="display: none;">
+                            <div class="result-summary">
+                                <div class="result-status-wrapper">
+                                    <span class="result-label">Diagnóstico Detectado:</span>
+                                    <div class="result-badge" id="result-badge">
+                                        <i id="result-icon" data-lucide="shield-check"></i>
+                                        <span id="result-text">Cargando...</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="confidence-section">
+                                    <div class="confidence-header">
+                                        <span>Confianza de la Predicción</span>
+                                        <span class="confidence-val" id="confidence-percentage">0%</span>
+                                    </div>
+                                    <div class="confidence-bar-bg">
+                                        <div class="confidence-bar-fill" id="confidence-fill"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Tiempo de Inferencia</span>
+                                        <span class="metric-value" id="inference-time">-- ms</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Sensibilidad Aplicada</span>
+                                        <span class="metric-value" id="applied-threshold">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Explanability / Grad-CAM Card -->
+                    <section class="card explain-card" id="explain-card" style="display: none;">
+                        <div class="card-header">
+                            <i data-lucide="eye"></i>
+                            <h2>Visualización de Explicabilidad (Grad-CAM)</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="comparison-container">
+                                <div class="image-box">
+                                    <h3>Radiografía Preprocesada</h3>
+                                    <div class="image-wrapper" id="preprocessed-wrapper">
+                                        <div class="image-spinner" id="prep-spinner" style="display: none;">
+                                            <div class="double-bounce1"></div>
+                                            <div class="double-bounce2"></div>
+                                        </div>
+                                        <img id="img-preprocessed" src="" alt="Radiografía con filtros aplicados">
+                                    </div>
+                                </div>
+                                <div class="image-box">
+                                    <h3>Mapa de Calor Neural</h3>
+                                    <div class="image-wrapper" id="heatmap-wrapper">
+                                        <div class="image-spinner" id="heatmap-spinner">
+                                            <div class="double-bounce1"></div>
+                                            <div class="double-bounce2"></div>
+                                        </div>
+                                        <img id="img-heatmap" src="" alt="Grad-CAM Heatmap">
+                                    </div>
+                                    <div class="gcam-legend">
+                                        <span class="legend-label">Activación Neural:</span>
+                                        <div class="legend-gradient"></div>
+                                        <div class="legend-scale">
+                                            <span>Mínima</span>
+                                            <span>Máxima</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script de Inicialización de Lucide Icons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Set current date
+            const dateSpan = document.getElementById('current-date');
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            dateSpan.textContent = `${day}/${month}/${year}`;
+        });
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>
