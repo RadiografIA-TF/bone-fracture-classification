@@ -15,47 +15,32 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <div class="brand-icon">
-                    <i data-lucide="activity"></i>
-                </div>
-                <span>Radiograf<span class="highlight">IA</span></span>
-            </div>
-            <nav class="sidebar-menu">
-                <a href="#" class="menu-item active" id="menu-dashboard">
-                    <i data-lucide="layout-dashboard"></i>
-                    <span>Diagnóstico</span>
-                </a>
-                <a href="https://github.com/RadiografIA-TF/bone-fracture-classification" target="_blank" class="menu-item" id="menu-github">
-                    <i data-lucide="github"></i>
-                    <span>Repositorio</span>
-                </a>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="connection-status">
-                    <span class="status-indicator online" id="status-dot"></span>
-                    <span id="status-text">Conectando...</span>
-                </div>
-                <div class="device-info" id="device-badge">
-                    <i data-lucide="cpu"></i>
-                    <span id="device-text">Dispositivo: -</span>
-                </div>
-            </div>
-        </aside>
-
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="app-header">
-                <div class="header-title">
-                    <h1>Portal de Diagnóstico Radiológico</h1>
-                    <p class="subtitle">Asistente de detección de fracturas óseas en tiempo real</p>
+                <div class="header-brand-and-title">
+                    <div class="sidebar-brand">
+                        <div class="brand-icon">
+                            <i data-lucide="activity"></i>
+                        </div>
+                        <span>Radiograf<span class="highlight">IA</span></span>
+                    </div>
+                    <div class="vertical-divider"></div>
+                    <div class="header-title">
+                        <h1>Portal de Diagnóstico Radiológico</h1>
+                        <p class="subtitle">Asistente de detección de fracturas óseas en tiempo real</p>
+                    </div>
                 </div>
                 <div class="header-actions">
-                    <div class="date-badge">
-                        <i data-lucide="calendar"></i>
-                        <span id="current-date">--/--/----</span>
+                    <div class="header-status-and-device">
+                        <div class="connection-status">
+                            <span class="status-indicator online" id="status-dot"></span>
+                            <span id="status-text">Conectando...</span>
+                        </div>
+                        <div class="device-info" id="device-badge">
+                            <i data-lucide="cpu"></i>
+                            <span id="device-text">Dispositivo: -</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -221,14 +206,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
-            // Set current date
-            const dateSpan = document.getElementById('current-date');
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            dateSpan.textContent = `${day}/${month}/${year}`;
         });
     </script>
     <script src="js/app.js"></script>

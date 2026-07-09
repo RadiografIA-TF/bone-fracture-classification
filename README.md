@@ -60,7 +60,6 @@ bone-fracture-classification/
     ├── evaluate.py
     ├── inference.py
     ├── train.py
-    ├── train_finetune.py
     ├── models/
     │   ├── __init__.py
     │   └── efficientnet.py
