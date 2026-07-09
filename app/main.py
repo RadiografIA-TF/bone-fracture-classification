@@ -81,7 +81,7 @@ def startup_event():
         model.unfreze_backbone(phase_num=0)
 
         # 3. Cargar los pesos oficiales (v3)
-        checkpoint_path = PROJECT_ROOT / "checkpoints" / "radriografia_efficientnet_b3_ft3.h5"
+        checkpoint_path = PROJECT_ROOT / config["paths"]["model_path_ft3"]
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"No se encontró el archivo de pesos (checkpoint) en {checkpoint_path}")
 

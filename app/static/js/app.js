@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // API URL Base (relativa al host actual para despliegue local sencillo)
-    const API_BASE = window.location.origin;
+    const API_BASE = "http://localhost:8000";
 
     // Estado local de la aplicación
     let selectedFile = null;
